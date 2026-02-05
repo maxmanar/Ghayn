@@ -5,12 +5,12 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAnu7eneAfrEYMTndS6hJD0UvHPNPJnUaU",
-  authDomain: "ghayn-store.firebaseapp.com",
-  projectId: "ghayn-store",
-  storageBucket: "ghayn-store.firebasestorage.app",
-  messagingSenderId: "847670538155",
-  appId: "1:847670538155:web:7e9ccf7bcc6447c12c2cee"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
 const app = initializeApp(firebaseConfig)
@@ -128,11 +128,11 @@ const categories: Category[] = [
 ]
 
 const staffUsers: StaffUser[] = [
-  { email: 'm7md3mkall0@gmail.com', password: 'admin123456', name: 'محمد', role: 'admin' }
+  { email: import.meta.env.VITE_ADMIN_EMAIL, password: import.meta.env.VITE_ADMIN_PASSWORD, name: 'محمد', role: 'admin' }
 ]
 
 // ============ Google Gemini AI ============
-const GEMINI_API_KEY = 'AIzaSyD7GZA87pgfQpX8KkqW-YIF4_GnfuuB9_w'
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
 async function getAIResponse(userMessage: string): Promise<string> {
   try {
@@ -362,9 +362,9 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          service_id: 'service_ghayn',
-          template_id: 'template_order',
-          user_id: 'mrqlH7mdRG0OSnZ4N',
+          service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          template_id: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          user_id: import.meta.env.VITE_EMAILJS_USER_ID,
           template_params: emailParams
         })
       })
