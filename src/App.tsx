@@ -5,16 +5,23 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy } from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
 }
 
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+let app: any
+let db: any
+
+try {
+  app = initializeApp(firebaseConfig)
+  db = getFirestore(app)
+} catch (error) {
+  console.error('Firebase initialization failed:', error)
+}
 
 // ============ الأنواع ============
 interface Category {
@@ -128,13 +135,21 @@ const categories: Category[] = [
 ]
 
 const staffUsers: StaffUser[] = [
-  { email: import.meta.env.VITE_ADMIN_EMAIL, password: import.meta.env.VITE_ADMIN_PASSWORD, name: 'محمد', role: 'admin' }
+  {
+    email: import.meta.env.VITE_ADMIN_EMAIL || 'admin@ghayn.com',
+    password: import.meta.env.VITE_ADMIN_PASSWORD || 'admin123456',
+    name: 'محمد',
+    role: 'admin'
+  }
 ]
 
 // ============ Google Gemini AI ============
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 
 async function getAIResponse(userMessage: string): Promise<string> {
+  if (!GEMINI_API_KEY) {
+    return 'خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة لاحقاً.'
+  }
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -358,16 +373,22 @@ export default function App() {
         attachments: orderForm.files.map(f => f.name).join(', ') || 'لا يوجد'
       }
 
-      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          template_id: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-          user_id: import.meta.env.VITE_EMAILJS_USER_ID,
-          template_params: emailParams
+      const emailJsServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || ''
+      const emailJsTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || ''
+      const emailJsUserId = import.meta.env.VITE_EMAILJS_USER_ID || ''
+
+      if (emailJsServiceId && emailJsTemplateId && emailJsUserId) {
+        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: emailJsServiceId,
+            template_id: emailJsTemplateId,
+            user_id: emailJsUserId,
+            template_params: emailParams
+          })
         })
-      })
+      }
     } catch (error) {
       console.error('Email error:', error)
     }
